@@ -48,6 +48,9 @@ mysql -u root -p rest_spring_db < dump.sql
 
 3. Configure a aplicação
 
+3.1. Copie `application-example.properties` para `application.properties`
+3.2. Preencha com suas configurações:
+
 Edite o application.properties:
 # Banco de dados
 spring.datasource.url=jdbc:mysql://localhost:3306/rest_spring_db
@@ -60,6 +63,9 @@ spring.jpa.show-sql=true
 
 # JWT (altere para uma chave segura)
 api.security.token.secret=sua-chave-secreta-jwt-aqui
+
+
+
 
 4. Execute a aplicação
 

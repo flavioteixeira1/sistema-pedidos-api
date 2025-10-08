@@ -54,3 +54,8 @@ bin/
 *.war
 *.ear
 
+
+# Configurações específicas do ambiente
+application.properties
+
+
