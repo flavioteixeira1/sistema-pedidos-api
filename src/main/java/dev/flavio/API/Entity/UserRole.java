@@ -1,12 +1,10 @@
 package dev.flavio.API.Entity;
 
 public enum UserRole {
-    
     ADMIN("admin"),
+    USER("user"),
     SUPERVISOR("supervisor"),
-    INFRA("infra"),
-    USER("user");
-
+    INFRA("infra");
 
     private final String role;
 

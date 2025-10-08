@@ -31,3 +31,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Logs
+*.log
+logs/
+
+# Banco de dados
+*.db
+*.sqlite
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+
+# Arquivos compilados
+target/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
