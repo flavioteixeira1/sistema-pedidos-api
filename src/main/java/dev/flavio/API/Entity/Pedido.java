@@ -1,0 +1,137 @@
+package dev.flavio.API.Entity;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.PrePersist;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@Entity
+public class Pedido {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String endereco;
+
+    private LocalDateTime dataPedido;
+
+    private String status;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ItemPedido> itens = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    @JsonIgnore
+    private Clientes cliente;
+
+    // Método para ser executado antes de persistir
+    @PrePersist
+    public void prePersist() {
+        if (dataPedido == null) {
+            dataPedido = LocalDateTime.now();
+        }
+    }
+
+    // Método auxiliar para adicionar item
+    public void adicionarItem(Produto produto, Integer quantidade) {
+        ItemPedido item = new ItemPedido();
+        item.setPedido(this);
+        item.setProduto(produto);
+        item.setQuantidade(quantidade);
+        item.setPrecoUnitario(BigDecimal.valueOf(produto.getPreco()));
+        itens.add(item);
+    }
+
+    // Método auxiliar para remover item
+    public void removerItem(ItemPedido item) {
+        itens.remove(item);
+        item.setPedido(null);
+    }
+
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public LocalDateTime getDataPedido() {
+        return dataPedido;
+    }
+
+    public void setDataPedido(LocalDateTime dataPedido) {
+        this.dataPedido = dataPedido;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Set<ItemPedido> getItens() {
+        return itens;
+    }
+    
+    public void setItens(Set<ItemPedido> itens) {
+        this.itens = itens;
+        // Garantir o relacionamento bidirecional
+        if (itens != null) {
+            for (ItemPedido item : itens) {
+                item.setPedido(this);
+            }
+        }
+    }
+
+    public Clientes getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Clientes cliente) {
+        this.cliente = cliente;
+    }
+
+    // Calcular total do pedido
+    @JsonProperty("total")
+    public BigDecimal getTotal() {
+        if (itens == null || itens.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return itens.stream()
+            .map(ItemPedido::getSubtotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Método para facilitar a exibição do cliente no JSON
+    @JsonProperty("cliente")
+    public Clientes getClienteJson() {
+        return cliente;
+    }
+}
