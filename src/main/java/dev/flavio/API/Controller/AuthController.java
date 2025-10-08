@@ -37,18 +37,7 @@ public class AuthController {
         this.tokenConfig = tokenConfig;
     }
 
-    /*
-    @PostMapping("/logar")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
-        User  newUser = (User) authentication.getPrincipal();
-        String token = tokenConfig.generateToken(newUser); 
-        
-        return ResponseEntity.ok(new LoginResponse(token));
-    }
-
-     */
+    
 
     @PostMapping("/logar")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
@@ -60,7 +49,7 @@ public class AuthController {
     User newUser = (User) authentication.getPrincipal();
     String token = tokenConfig.generateToken(newUser); 
     
-    System.out.println("Token gerado para: " + newUser.getemail());
+    System.out.println("Token gerado para: " + newUser.getEmail());
     return ResponseEntity.ok(new LoginResponse(token));
 }
 
@@ -68,10 +57,11 @@ public class AuthController {
     public ResponseEntity<RegisterUserResponse> register (@Valid @RequestBody RegisterUserRequest request){
         User newUser = new User();
         newUser.setPassword(passwordEncoder.encode(request.password()));
-        newUser.setemail(request.email());
-        newUser.setname(request.name());
+        newUser.setEmail(request.email());
+        newUser.setName(request.name());
+        newUser.setRole(request.role());
         repository.save(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterUserResponse(newUser.getname(), newUser.getemail()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterUserResponse(newUser.getName(), newUser.getEmail()));
         
     }
 }
