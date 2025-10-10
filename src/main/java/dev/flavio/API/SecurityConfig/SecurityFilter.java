@@ -32,10 +32,13 @@ public class SecurityFilter extends OncePerRequestFilter{
             throws ServletException, IOException { 
     
         String authorizedHeader = request.getHeader("Authorization");
+
+        System.out.println("🔍 Header Authorization recebido: " + authorizedHeader);
         
-        // ✅ CORREÇÃO: Use && (AND) mas com a negação correta
         if (!Strings.isEmpty(authorizedHeader) && authorizedHeader.startsWith("Bearer ")){
             String token = authorizedHeader.substring("Bearer ".length());
+            System.out.println("🔍 Token extraído: " + token.substring(0, Math.min(20, token.length())) + "...");
+
             Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
             
             if(optUser.isPresent()){
@@ -56,7 +59,7 @@ public class SecurityFilter extends OncePerRequestFilter{
             System.out.println("ℹ️  Header Authorization ausente ou mal formatado: " + authorizedHeader);
         }
         
-        // ✅ SEMPRE chame o filterChain para continuar a cadeia de filtros
+        // ✅ SEMPRE chamar o filterChain para continuar a cadeia de filtros
         filterChain.doFilter(request, response);
     }
 }

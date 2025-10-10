@@ -1,0 +1,61 @@
+classDiagram
+    direction LR
+
+    class Clientes {
+        +Long id
+        +String nome
+        +String email
+        +String telefone
+        +LocalDateTime dataCadastro
+        +Set~Pedido~ pedidos
+    }
+
+    class Pedido {
+        +Long id
+        +String endereco
+        +LocalDateTime dataPedido
+        +String status
+        +Set~ItemPedido~ itens
+        +Clientes cliente
+        +BigDecimal getTotal()
+        +adicionarItem(Produto, Integer)
+        +removerItem(ItemPedido)
+    }
+
+    class ItemPedido {
+        +Long id
+        +Pedido pedido
+        +Produto produto
+        +Integer quantidade
+        +BigDecimal precoUnitario
+        +BigDecimal getSubtotal()
+    }
+
+    class Produto {
+        +Long id
+        +String nome
+        +Double preco
+        +String descricao
+    }
+
+    class User {
+        +Long id
+        +String name
+        +String email
+        +String password
+        +UserRole role
+        +getAuthorities() Collection~GrantedAuthority~
+    }
+
+    class UserRole {
+        <<enumeration>>
+        ADMIN
+        USER
+        SUPERVISOR
+        INFRA
+    }
+
+    %% Relacionamentos
+    Clientes "1" -- "*" Pedido : possui
+    Pedido "1" -- "*" ItemPedido : contém
+    ItemPedido "1" -- "1" Produto : referencia
