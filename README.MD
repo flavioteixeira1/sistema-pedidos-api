@@ -46,6 +46,124 @@ CREATE DATABASE rest_spring_db;
 -- Ou execute o dump SQL fornecido
 mysql -u root -p rest_spring_db < dump.sql
 
+
+2.1 Detalhamento do banco de dados rest_spring_db
+
+
+``` 
+classDiagram
+    direction LR
+
+    class Clientes {
+        +Long id
+        +String nome
+        +String email
+        +String telefone
+        +LocalDateTime dataCadastro
+        +Set~Pedido~ pedidos
+    }
+
+    class Pedido {
+        +Long id
+        +String endereco
+        +LocalDateTime dataPedido
+        +String status
+        +Set~ItemPedido~ itens
+        +Clientes cliente
+        +BigDecimal getTotal()
+        +adicionarItem(Produto, Integer)
+        +removerItem(ItemPedido)
+    }
+
+    class ItemPedido {
+        +Long id
+        +Pedido pedido
+        +Produto produto
+        +Integer quantidade
+        +BigDecimal precoUnitario
+        +BigDecimal getSubtotal()
+    }
+
+    class Produto {
+        +Long id
+        +String nome
+        +Double preco
+        +String descricao
+    }
+
+    class User {
+        +Long id
+        +String name
+        +String email
+        +String password
+        +UserRole role
+        +getAuthorities() Collection~GrantedAuthority~
+    }
+
+    class UserRole {
+        <<enumeration>>
+        ADMIN
+        USER
+        SUPERVISOR
+        INFRA
+    }
+
+    %% Relacionamentos
+    Clientes "1" -- "*" Pedido : possui
+    Pedido "1" -- "*" ItemPedido : contém
+    ItemPedido "1" -- "1" Produto : referencia
+
+
+``` 
+
+
+2.2 Descrição das Entidades e Relacionamentos:
+Clientes
+
+    Entidade principal que representa os clientes do sistema
+
+    Possui relacionamento One-to-Many com Pedido
+
+    Atributos: dados pessoais e data de cadastro
+
+Pedido
+
+    Representa os pedidos realizados pelos clientes
+
+    Relacionamento Many-to-One com Clientes
+
+    Relacionamento One-to-Many com ItemPedido
+
+    Métodos utilitários para cálculo de total e gestão de itens
+
+ItemPedido
+
+    Tabela de junção entre Pedido e Produto
+
+    Armazena quantidade e preço unitário no momento da compra
+
+    Possui métodos para cálculo de subtotal
+
+Produto
+
+    Catálogo de produtos disponíveis para venda
+
+    Relacionamento One-to-Many com ItemPedido
+
+User
+
+    Sistema de autenticação e autorização
+
+    Implementa UserDetails do Spring Security
+
+    Suporte a diferentes roles de usuário
+
+UserRole
+
+    Enumeração que define os papéis de usuário no sistema
+
+ 
+
 3. Configure a aplicação
 
 3.1. Copie `application-example.properties` para `application.properties`

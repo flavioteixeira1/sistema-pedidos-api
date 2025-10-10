@@ -32,7 +32,6 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                     .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                    
                     // ✅ Endpoints públicos (autenticação)
                     .requestMatchers(HttpMethod.POST, "/auth/logar").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
