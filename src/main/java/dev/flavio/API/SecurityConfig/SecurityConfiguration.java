@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
                     
                     // ✅ Endpoints para ADMIN apenas
+                    .requestMatchers(HttpMethod.GET,"/teste").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/cliente/save").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/cliente/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/cliente/**").hasRole("ADMIN")

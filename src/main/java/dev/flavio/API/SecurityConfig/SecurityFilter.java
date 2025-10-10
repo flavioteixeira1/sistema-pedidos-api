@@ -28,38 +28,39 @@ public class SecurityFilter extends OncePerRequestFilter{
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException { 
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+        throws ServletException, IOException { 
+
+    String authorizedHeader = request.getHeader("Authorization");
+
+    System.out.println("🔍 Header Authorization recebido: " + authorizedHeader);
     
-        String authorizedHeader = request.getHeader("Authorization");
+    if (!Strings.isEmpty(authorizedHeader) && authorizedHeader.startsWith("Bearer ")){
+        String token = authorizedHeader.substring("Bearer ".length());
+        System.out.println("🔍 Token extraído: " + token.substring(0, Math.min(20, token.length())) + "...");
 
-        System.out.println("🔍 Header Authorization recebido: " + authorizedHeader);
+        Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
         
-        if (!Strings.isEmpty(authorizedHeader) && authorizedHeader.startsWith("Bearer ")){
-            String token = authorizedHeader.substring("Bearer ".length());
-            System.out.println("🔍 Token extraído: " + token.substring(0, Math.min(20, token.length())) + "...");
-
-            Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
+        if(optUser.isPresent()){
+            JWTUserData userData = optUser.get();
             
-            if(optUser.isPresent()){
-                JWTUserData userData = optUser.get();
-                // ✅ Adicione authorities (ajuste conforme suas roles)
-                UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(
-                        userData, 
-                        null, 
-                        List.of(new SimpleGrantedAuthority("ROLE_USER")) // Ajuste conforme necessário
-                    );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("✅ Usuário autenticado: " + userData.email());
-            } else {
-                System.out.println("❌ Token inválido ou expirado");
-            }
+            // ✅ Use o método getAuthorities() que você já definiu
+            UsernamePasswordAuthenticationToken authentication = 
+                new UsernamePasswordAuthenticationToken(
+                    userData, 
+                    null, 
+                    userData.getAuthorities() // ✅ Isso agora funcionará
+                );
+            
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("✅ Usuário autenticado: " + userData.email() + " com role: " + userData.role());
         } else {
-            System.out.println("ℹ️  Header Authorization ausente ou mal formatado: " + authorizedHeader);
+            System.out.println("❌ Token inválido ou expirado");
         }
-        
-        // ✅ SEMPRE chamar o filterChain para continuar a cadeia de filtros
-        filterChain.doFilter(request, response);
+    } else {
+        System.out.println("ℹ️  Header Authorization ausente ou mal formatado: " + authorizedHeader);
     }
+    
+    filterChain.doFilter(request, response);
+}
 }

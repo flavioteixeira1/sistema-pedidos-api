@@ -27,6 +27,7 @@ public class TokenConfig {
 
         return JWT.create()
             .withClaim("userId", newuser.getId())
+            .withClaim("role", newuser.getRole().name()) 
             .withSubject(newuser.getEmail())
             .withExpiresAt(Instant.now().plusSeconds(expiration))
             .withIssuedAt(Instant.now())
@@ -38,12 +39,17 @@ public class TokenConfig {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             DecodedJWT decode = JWT.require(algorithm).build().verify(token);
 
+            // ✅ Extrair a role do token
+            String role = decode.getClaim("role").asString();
+            
             System.out.println("✅ Token válido para: " + decode.getSubject());
             System.out.println("✅ User ID: " + decode.getClaim("userId").asLong());
-            
+            System.out.println("✅ Role: " + role); // Log para debug
+
             return Optional.of(JWTUserData.builder()
                 .userId(decode.getClaim("userId").asLong())
                 .email(decode.getSubject())
+                .role(role) // ✅ AGORA incluindo a role!
                 .build());
         }
         catch(JWTVerificationException exception){
