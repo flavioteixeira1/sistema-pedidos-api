@@ -43,24 +43,24 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.POST, "/auth/logar").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
                     
-                    // ✅ Endpoints para ADMIN apenas
-                    .requestMatchers(HttpMethod.GET,"/teste").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.POST, "/cliente/save").hasRole("ADMIN")
+                    // ✅ Endpoints para ADMIN , SUPERVISOR ou INFRA
+                   // .requestMatchers(HttpMethod.GET,"/teste").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/cliente/save").hasAnyRole("ADMIN", "SUPERVISOR")
                     .requestMatchers(HttpMethod.PUT, "/cliente/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/cliente/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/cliente/**").hasAnyRole("ADMIN", "INFRA")
                     
-                    .requestMatchers(HttpMethod.POST, "/produto/save").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/produto/save").hasAnyRole("ADMIN","SUPERVISOR", "INFRA")
                     .requestMatchers(HttpMethod.PUT, "/produto/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/produto/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/produto/**").hasAnyRole("ADMIN", "SUPERVISOR", "INFRA")
                     
                     // ✅ Endpoints para USER (criação, alteração parcial e deleção de pedidos)
-                    .requestMatchers(HttpMethod.POST, "/pedido/**").hasAnyRole("USER", "ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/pedido/**").hasAnyRole("USER", "ADMIN")
-                    .requestMatchers(HttpMethod.PATCH, "/pedido/**").hasAnyRole("USER", "ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/pedido/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/pedido/**").hasAnyRole("USER", "ADMIN", "SUPERVISOR")
+                    .requestMatchers(HttpMethod.PUT, "/pedido/**").hasAnyRole("USER", "ADMIN", "SUPERVISOR")
+                    .requestMatchers(HttpMethod.PATCH, "/pedido/**").hasAnyRole("USER", "ADMIN","SUPERVISOR")
+                    .requestMatchers(HttpMethod.DELETE, "/pedido/**").hasAnyRole("USER", "ADMIN", "SUPERVISOR")
                     
                     // ✅ Endpoints de consulta para todos os usuários autenticados
-                    .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("USER", "ADMIN", "SUPERVISOR", "INFRA")
                     
                     // ✅ Todos os outros endpoints exigem autenticação
                     .anyRequest().authenticated())

@@ -33,7 +33,7 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
 
     String authorizedHeader = request.getHeader("Authorization");
 
-    System.out.println("🔍 Header Authorization recebido: " + authorizedHeader);
+    System.out.println("🔍 Header Authorization recebido: " + authorizedHeader); //para ver o header na saída do terminal
     
     if (!Strings.isEmpty(authorizedHeader) && authorizedHeader.startsWith("Bearer ")){
         String token = authorizedHeader.substring("Bearer ".length());
@@ -44,12 +44,12 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
         if(optUser.isPresent()){
             JWTUserData userData = optUser.get();
             
-            // ✅ Use o método getAuthorities() que você já definiu
+            // ✅ Usando o método getAuthorities() que foi definido na classe User.java
             UsernamePasswordAuthenticationToken authentication = 
                 new UsernamePasswordAuthenticationToken(
                     userData, 
                     null, 
-                    userData.getAuthorities() // ✅ Isso agora funcionará
+                    userData.getAuthorities() // ✅ Isso ja está ok!
                 );
             
             SecurityContextHolder.getContext().setAuthentication(authentication);
