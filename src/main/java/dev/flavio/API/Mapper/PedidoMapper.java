@@ -4,7 +4,6 @@ import dev.flavio.API.dto.*;
 import dev.flavio.API.Entity.Pedido;
 import dev.flavio.API.Entity.ItemPedido;
 import dev.flavio.API.Entity.Produto;
-import dev.flavio.API.Entity.Clientes;
 
 import java.util.stream.Collectors;
 

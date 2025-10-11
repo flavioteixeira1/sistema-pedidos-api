@@ -58,4 +58,10 @@ bin/
 # Configurações específicas do ambiente
 application.properties
 
+# diversos
+
+Diagrama_tabelas.mermaid
+Diagrama_Tabelas.png
+backupv1.sql
+
 
