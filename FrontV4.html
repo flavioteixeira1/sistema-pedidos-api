@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Front-end API Produtos Agrícolas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: #1B5E20;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .entity-tabs {
+            display: flex;
+            background: #2E7D32;
+            padding: 0;
+        }
+
+        .entity-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .entity-tab.active {
+            background: #4CAF50;
+            border-bottom: 3px solid #FFEB3B;
+        }
+
+        .entity-tab:hover {
+            background: #388E3C;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .request-section, .response-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        h2 {
+            color: #1B5E20;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2E7D32;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+
+        .endpoint-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .endpoint-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #E8F5E8;
+            color: #1B5E20;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #C8E6C9;
+            font-size: 14px;
+        }
+
+        .endpoint-btn:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .endpoint-btn.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #2E7D32;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-send {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-send:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .response-area {
+            background: #1B5E20;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .status-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .status-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-error {
+            background: #f44336;
+            color: white;
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            border-color: #4CAF50;
+            transform: translateX(5px);
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .get { background: #4CAF50; }
+        .post { background: #2196F3; }
+        .put { background: #FF9800; }
+        .delete { background: #f44336; }
+
+        .preview-item {
+            background: white;
+            border: 1px solid #E8F5E8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .preview-item:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .preview-item h4 {
+            color: #1B5E20;
+            margin-bottom: 8px;
+        }
+
+        .preview-item p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .id-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .id-input-group input {
+            flex: 1;
+        }
+
+        .id-input-group button {
+            flex: 0 0 auto;
+            padding: 12px 20px;
+            background: #2196F3;
+            color: white;
+        }
+
+        .id-input-group button:hover {
+            background: #1976D2;
+        }
+        
+        .token-display {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌱 Front-end API Produtos Agrícolas</h1>
+            <p class="subtitle">Teste de autenticação e busca de produtos</p>
+        </header>
+
+        <div class="entity-tabs">
+            <div class="entity-tab active" onclick="setEntity('auth')">🔐 Autenticação</div>
+            <div class="entity-tab" onclick="setEntity('produto')">📦 Produtos</div>
+        </div>
+
+        <div class="main-content">
+            <section class="request-section">
+                <h2>📡 Configurar Requisição</h2>
+                
+                <div class="endpoint-buttons" id="auth-endpoints">
+                    <button class="endpoint-btn active" onclick="setEndpoint('auth', 'login')">🔑 Login</button>
+                    <button class="endpoint-btn" onclick="setEndpoint('auth', 'registrar')">👤 Registrar</button>
+                </div>
+
+                <div class="endpoint-buttons" id="produto-endpoints" style="display: none;">
+                    <button class="endpoint-btn active" onclick="setEndpoint('produto', 'buscar')">🔍 Buscar por ID</button>
+                    <button class="endpoint-btn" onclick="setEndpoint('produto', 'todos')">📋 Buscar Todos</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="method">Método HTTP:</label>
+                    <select id="method">
+                        <option value="POST">POST</option>
+                        <option value="GET">GET</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="url">URL da API:</label>
+                    <input type="url" id="url" placeholder="http://localhost:8080/auth/logar" value="http://localhost:8080/auth/logar">
+                </div>
+
+                <div class="form-group" id="id-input-group" style="display: none;">
+                    <label for="entity-id">ID:</label>
+                    <div class="id-input-group">
+                        <input type="number" id="entity-id" placeholder="Digite o ID">
+                        <button onclick="applyIdToUrl()">Aplicar ID</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="headers">Cabeçalhos (JSON):</label>
+                    <textarea id="headers">{
+  "Content-Type": "application/json"
+}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="body">Corpo da Requisição (JSON):</label>
+                    <textarea id="body">{
+  "email": "usuario@exemplo.com",
+  "password": "senha123"
+}</textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-send" onclick="sendRequest()">🚀 Enviar Requisição</button>
+                    <button class="btn-clear" onclick="clearAll()">🗑️ Limpar Tudo</button>
+                </div>
+
+                <!-- Token JWT -->
+                <div class="form-group" id="token-section">
+                    <label>🔑 Token JWT:</label>
+                    <div class="token-display" id="token-display">
+                        Nenhum token disponível
+                    </div>
+                    <button class="endpoint-btn" onclick="copyToken()" style="margin-top: 10px;">📋 Copiar Token</button>
+                </div>
+
+                <!-- Preview de Login/Registro -->
+                <div class="form-group" id="auth-previews">
+                    <label>👤 Usuários de Exemplo (Clique para usar):</label>
+                    <div class="preview-item" onclick="useSampleUser(1)">
+                        <h4>👤 Usuário Admin</h4>
+                        <p><strong>Email:</strong> admin@agricola.com</p>
+                        <p><strong>Senha:</strong> admin123</p>
+                        <p><strong>Role:</strong> ADMIN</p>
+                    </div>
+                    <div class="preview-item" onclick="useSampleUser(2)">
+                        <h4>👤 Usuário Comum</h4>
+                        <p><strong>Email:</strong> user@agricola.com</p>
+                        <p><strong>Senha:</strong> user123</p>
+                        <p><strong>Role:</strong> USER</p>
+                    </div>
+                </div>
+
+                <!-- Preview de Produtos para Teste -->
+                <div class="form-group" id="produto-previews" style="display: none;">
+                    <label>📦 IDs de Produtos para Teste:</label>
+                    <div class="preview-item" onclick="useSampleProductId(1)">
+                        <h4>🌽 Produto ID: 1</h4>
+                        <p><strong>Nome:</strong> Milho Verde</p>
+                        <p><strong>Preço:</strong> R$ 3.50</p>
+                    </div>
+                    <div class="preview-item" onclick="useSampleProductId(2)">
+                        <h4>🍅 Produto ID: 2</h4>
+                        <p><strong>Nome:</strong> Tomate Carmem</p>
+                        <p><strong>Preço:</strong> R$ 4.75</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="response-section">
+                <h2>📨 Resposta da API</h2>
+                <div id="status" class="status-indicator">Aguardando requisição...</div>
+                <div class="response-area" id="response">
+                    {/* A resposta será exibida aqui */}
+                </div>
+            </section>
+
+            <section class="history-section">
+                <h2>📚 Histórico de Requisições</h2>
+                <div id="history">
+                    {/* Histórico será preenchido aqui */}
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080';
+        let requestHistory = JSON.parse(localStorage.getItem('apiHistoryAgricola')) || [];
+        let currentEntity = 'auth';
+        let currentToken = localStorage.getItem('jwtToken') || null;
+
+        // Usuários de exemplo
+        const sampleUsers = {
+            1: {
+                email: "admin@agricola.com",
+                password: "admin123",
+                role: "ADMIN"
+            },
+            2: {
+                email: "user@agricola.com",
+                password: "user123",
+                role: "USER"
+            }
+        };
+
+        // Produtos de exemplo
+        const sampleProducts = {
+            1: {
+                nome: "Milho Verde",
+                preco: 3.50,
+                descricao: "Milho verde fresco da safra"
+            },
+            2: {
+                nome: "Tomate Carmem",
+                preco: 4.75,
+                descricao: "Tomate orgânico carnudo"
+            }
+        };
+
+        // Inicializar a página
+        displayHistory();
+        updateTokenDisplay();
+
+        function setEntity(entity) {
+            currentEntity = entity;
+            
+            // Atualizar tabs
+            document.querySelectorAll('.entity-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Mostrar/ocultar endpoints
+            document.getElementById('auth-endpoints').style.display = entity === 'auth' ? 'grid' : 'none';
+            document.getElementById('produto-endpoints').style.display = entity === 'produto' ? 'grid' : 'none';
+            
+            // Mostrar/ocultar previews
+            document.getElementById('auth-previews').style.display = entity === 'auth' ? 'block' : 'none';
+            document.getElementById('produto-previews').style.display = entity === 'produto' ? 'block' : 'none';
+            
+            // Resetar para o primeiro endpoint da entidade
+            if (entity === 'auth') {
+                setEndpoint('auth', 'login');
+            } else {
+                setEndpoint('produto', 'buscar');
+            }
+        }
+
+        function setEndpoint(entity, type) {
+            const endpoints = document.getElementById(`${entity}-endpoints`);
+            const buttons = endpoints.querySelectorAll('.endpoint-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const methodSelect = document.getElementById('method');
+            const urlInput = document.getElementById('url');
+            const bodyTextarea = document.getElementById('body');
+            const idInputGroup = document.getElementById('id-input-group');
+
+            switch(type) {
+                case 'login':
+                    methodSelect.value = 'POST';
+                    urlInput.value = `${BASE_URL}/auth/logar`;
+                    bodyTextarea.value = JSON.stringify({
+                        email: sampleUsers[1].email,
+                        password: sampleUsers[1].password
+                    }, null, 2);
+                    idInputGroup.style.display = 'none';
+                    break;
+                    
+                case 'registrar':
+                    methodSelect.value = 'POST';
+                    urlInput.value = `${BASE_URL}/auth/registrar`;
+                    bodyTextarea.value = JSON.stringify({
+                        name: "Novo Usuário",
+                        email: "novo@agricola.com",
+                        password: "senha123",
+                        role: "USER"
+                    }, null, 2);
+                    idInputGroup.style.display = 'none';
+                    break;
+                    
+                case 'buscar':
+                    methodSelect.value = 'GET';
+                    urlInput.value = `${BASE_URL}/produto/1`;
+                    bodyTextarea.value = '';
+                    idInputGroup.style.display = 'block';
+                    break;
+                    
+                case 'todos':
+                    methodSelect.value = 'GET';
+                    urlInput.value = `${BASE_URL}/produto/busca-todos`;
+                    bodyTextarea.value = '';
+                    idInputGroup.style.display = 'none';
+                    break;
+            }
+        }
+
+        function applyIdToUrl() {
+            const id = document.getElementById('entity-id').value;
+            const urlInput = document.getElementById('url');
+            const currentUrl = urlInput.value;
+            
+            // Substituir o ID na URL
+            const newUrl = currentUrl.replace(/\/\d+$/, '') + '/' + id;
+            urlInput.value = newUrl;
+        }
+
+        function useSampleUser(id) {
+            document.getElementById('method').value = 'POST';
+            document.getElementById('url').value = `${BASE_URL}/auth/logar`;
+            document.getElementById('body').value = JSON.stringify({
+                email: sampleUsers[id].email,
+                password: sampleUsers[id].password
+            }, null, 2);
+            
+            // Ativar entidade e endpoint
+            setEntity('auth');
+            setEndpoint('auth', 'login');
+        }
+
+        function useSampleProductId(id) {
+            document.getElementById('method').value = 'GET';
+            document.getElementById('url').value = `${BASE_URL}/produto/${id}`;
+            document.getElementById('entity-id').value = id;
+            document.getElementById('body').value = '';
+            
+            // Ativar entidade e endpoint
+            setEntity('produto');
+            setEndpoint('produto', 'buscar');
+        }
+
+        
+
+
+
+    function sendRequest() {
+    const method = document.getElementById('method').value;
+    const url = document.getElementById('url').value;
+    const headersText = document.getElementById('headers').value;
+    const bodyText = document.getElementById('body').value;
+
+    const statusElement = document.getElementById('status');
+    const responseElement = document.getElementById('response');
+
+    // Validar URL
+    if (!url) {
+        statusElement.textContent = '❌ Erro: URL é obrigatória';
+        statusElement.className = 'status-indicator status-error';
+        return;
+    }
+
+    // Preparar headers
+    let headers = {};
+    try {
+        if (headersText.trim()) {
+            headers = JSON.parse(headersText);
+        }
+    } catch (e) {
+        statusElement.textContent = '❌ Erro: Headers em formato JSON inválido';
+        statusElement.className = 'status-indicator status-error';
+        return;
+    }
+
+    // ✅ CORREÇÃO: Sempre adicionar o token para endpoints protegidos
+    if (currentToken && !url.includes('/auth/')) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
+        console.log('🔑 Token adicionado aos headers:', currentToken.substring(0, 20) + '...');
+    }
+
+    // Preparar body
+    let body = null;
+    if ((method === 'POST' || method === 'PUT') && bodyText.trim()) {
+        try {
+            body = JSON.parse(bodyText);
+        } catch (e) {
+            statusElement.textContent = '❌ Erro: Body em formato JSON inválido';
+            statusElement.className = 'status-indicator status-error';
+            return;
+        }
+    }
+
+    statusElement.textContent = '⏳ Enviando requisição...';
+    statusElement.className = 'status-indicator';
+
+    console.log('🚀 Enviando requisição:', {
+        method,
+        url,
+        headers,
+        hasBody: !!body
+    });
+
+    // Fazer a requisição
+    fetch(url, {
+        method: method,
+        headers: headers,
+        body: body ? JSON.stringify(body) : null
+    })
+    .then(async response => {
+        console.log('📨 Resposta recebida:', response.status, response.statusText);
+        
+        let data;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+            try {
+                data = await response.json();
+            } catch {
+                data = { error: 'Erro ao parsear JSON' };
+            }
+        } else {
+            data = await response.text();
+        }
+        
+        // Salvar token se for uma resposta de login
+        if (url.includes('/auth/logar') && response.ok && data.token) {
+            currentToken = data.token;
+            localStorage.setItem('jwtToken', currentToken);
+            updateTokenDisplay();
+            console.log('🔑 Novo token salvo:', currentToken.substring(0, 20) + '...');
+        }
+        
+        // Salvar no histórico
+        const historyItem = {
+            method,
+            url,
+            headers,
+            body: body || null,
+            status: response.status,
+            statusText: response.statusText,
+            response: data,
+            timestamp: new Date().toLocaleString('pt-BR'),
+            entity: currentEntity
+        };
+
+        requestHistory.unshift(historyItem);
+        if (requestHistory.length > 15) {
+            requestHistory = requestHistory.slice(0, 15);
+        }
+        localStorage.setItem('apiHistoryAgricola', JSON.stringify(requestHistory));
+        displayHistory();
+
+        // Exibir resposta
+        if (response.ok) {
+            statusElement.textContent = `✅ ${response.status} ${response.statusText}`;
+            statusElement.className = 'status-indicator status-success';
+        } else {
+            statusElement.textContent = `⚠️ ${response.status} ${response.statusText}`;
+            statusElement.className = 'status-indicator status-error';
+        }
+        
+        responseElement.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        console.error('❌ Erro na requisição:', error);
+        statusElement.textContent = `❌ Erro: ${error.message}`;
+        statusElement.className = 'status-indicator status-error';
+        responseElement.textContent = `Possíveis causas:
+        1. API não está rodando em localhost:8080
+        2. Problema de CORS (verifique o console do navegador)
+        3. Erro de rede
+
+        Verifique se:
+        - Sua API Spring está rodando
+        - A porta 8080 está livre
+        - Não há erros no console do navegador (F12)
+
+        Detalhes do erro: ${error.toString()}`;
+    });
+}
+
+
+
+
+
+
+
+
+        function clearAll() {
+            document.getElementById('url').value = '';
+            document.getElementById('entity-id').value = '';
+            document.getElementById('headers').value = '{\n  "Content-Type": "application/json"\n}';
+            document.getElementById('body').value = '';
+            document.getElementById('status').textContent = 'Aguardando requisição...';
+            document.getElementById('status').className = 'status-indicator';
+            document.getElementById('response').textContent = '';
+        }
+
+        function displayHistory() {
+            const historyElement = document.getElementById('history');
+            historyElement.innerHTML = '';
+
+            requestHistory.forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div>
+                        <span class="method-badge ${item.method.toLowerCase()}">${item.method}</span>
+                        <span style="background: #795548; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 8px;">
+                            ${item.entity.toUpperCase()}
+                        </span>
+                        <strong>${item.url}</strong>
+                        <span style="float: right; color: #7f8c8d;">${item.timestamp}</span>
+                    </div>
+                    <div style="margin-top: 5px; color: #7f8c8d; font-size: 0.9em;">
+                        Status: ${item.status} - ${item.statusText}
+                    </div>
+                `;
+                
+                historyItem.onclick = () => loadFromHistory(item);
+                historyElement.appendChild(historyItem);
+            });
+
+            if (requestHistory.length === 0) {
+                historyElement.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Nenhuma requisição no histórico</p>';
+            }
+        }
+
+        function loadFromHistory(item) {
+            document.getElementById('method').value = item.method;
+            document.getElementById('url').value = item.url;
+            document.getElementById('headers').value = JSON.stringify(item.headers, null, 2);
+            document.getElementById('body').value = item.body ? JSON.stringify(item.body, null, 2) : '';
+            
+            // Extrair ID da URL se existir
+            const idMatch = item.url.match(/\/(\d+)$/);
+            if (idMatch) {
+                document.getElementById('entity-id').value = idMatch[1];
+                document.getElementById('id-input-group').style.display = 'block';
+            } else {
+                document.getElementById('id-input-group').style.display = 'none';
+            }
+            
+            // Ativar entidade e endpoints corretos
+            setEntity(item.entity);
+            
+            // Determinar qual endpoint ativar baseado na URL e método
+            const endpoints = document.getElementById(`${item.entity}-endpoints`);
+            const buttons = endpoints.querySelectorAll('.endpoint-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (item.url.includes('/auth/logar') && item.method === 'POST') {
+                buttons[0].classList.add('active');
+            } else if (item.url.includes('/auth/registrar') && item.method === 'POST') {
+                buttons[1].classList.add('active');
+            } else if (item.url.match(/\/produto\/\d+$/) && item.method === 'GET') {
+                buttons[0].classList.add('active');
+            } else if (item.url.includes('/produto/busca-todos')) {
+                buttons[1].classList.add('active');
+            }
+        }
+
+        function updateTokenDisplay() {
+            const tokenDisplay = document.getElementById('token-display');
+            if (currentToken) {
+                tokenDisplay.textContent = currentToken;
+                tokenDisplay.style.color = '#1B5E20';
+            } else {
+                tokenDisplay.textContent = 'Nenhum token disponível';
+                tokenDisplay.style.color = '#7f8c8d';
+            }
+        }
+
+        function copyToken() {
+            if (currentToken) {
+                navigator.clipboard.writeText(currentToken)
+                    .then(() => {
+                        alert('Token copiado para a área de transferência!');
+                    })
+                    .catch(err => {
+                        console.error('Erro ao copiar token: ', err);
+                    });
+            } else {
+                alert('Nenhum token disponível para copiar!');
+            }
+        }
+    </script>
+</body>
+</html>
