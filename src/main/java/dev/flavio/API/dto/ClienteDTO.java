@@ -2,7 +2,7 @@ package dev.flavio.API.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 
 public class ClienteDTO {
     private Long id;
