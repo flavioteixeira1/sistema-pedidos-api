@@ -26,16 +26,6 @@ public class SecurityFilter extends OncePerRequestFilter{
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException { 
-        
-        // ✅ Ignorar autenticação para rotas do Swagger
-        /*
-        String path = request.getRequestURI(); 
-        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/webjars/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-         */
    
     String authorizedHeader = request.getHeader("Authorization");
     System.out.println("🔍 Header Authorization recebido: " + authorizedHeader); //para ver o header na saída do terminal

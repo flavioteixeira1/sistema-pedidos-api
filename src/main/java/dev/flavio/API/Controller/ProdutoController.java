@@ -24,8 +24,11 @@ import dev.flavio.API.service.ProdutoService;
 @RequestMapping(value = "/produto")
 public class ProdutoController {
 
-	@Autowired
+	
 	private ProdutoService service;
+	public ProdutoController(ProdutoService service) {
+		this.service = service;
+	}
 
 	@PostMapping(value = "/save")
 	public ResponseEntity<Produto> salvaProduto(@RequestBody Produto produto) throws Exception {
