@@ -9,6 +9,7 @@ import dev.flavio.API.Controller.ProductNullException;
 import dev.flavio.API.Controller.ProductPriceException;
 import dev.flavio.API.Entity.Produto;
 import dev.flavio.API.Repository.ProdutoRepository;
+import dev.flavio.API.exceptions.RecursoNaoEncontradoException;
 
 
 @Service
@@ -41,13 +42,13 @@ public class ProdutoService {
 	public void delete(Long id) {
 		// Verifica se o produto existe antes de deletar
 		Produto produto = repository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado"));
 		repository.delete(produto);
 	}
 
 	private void validarProduto(Produto produto) throws Exception {
 		if (produto.getNome() == null) {
-			throw new ProductNullException();
+			throw new RecursoNaoEncontradoException("Nome do produto vazio ou nulo");
 		}
 
 		if (produto.getPreco() == null || produto.getPreco() < 0) {
@@ -56,7 +57,7 @@ public class ProdutoService {
 	}
 
 	public Produto findById(Long id) {
-		return repository.findById(id).orElse(null);
+		return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado"));
 	}
 	
 
@@ -64,8 +65,12 @@ public class ProdutoService {
 		return repository.findAll();
 	}
 
-	public List<Produto> findByNome(String nome) {
-    return repository.findByNomeContainingIgnoreCase(nome);
+	public List<Produto> findByNome(String nome) throws Exception {
+		if(repository.findByNomeContainingIgnoreCase(nome).isEmpty()) {
+			throw new RecursoNaoEncontradoException("Produto não encontrado");
+		}
+    	return repository.findByNomeContainingIgnoreCase(nome); 
+	
 	}
 
 

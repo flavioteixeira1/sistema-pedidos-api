@@ -19,7 +19,7 @@ public class TokenConfig {
     @Value("${api.security.token.secret}")
     private String secret;
     
-    @Value("${api.security.token.expiration:86400}") // valor padrão 24h
+    @Value("${api.security.token.expiration}") // valor padrão 24h
     private Long expiration;
 
     public String generateToken(User newuser){

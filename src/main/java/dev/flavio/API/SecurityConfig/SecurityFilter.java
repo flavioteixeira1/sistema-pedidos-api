@@ -24,11 +24,10 @@ public class SecurityFilter extends OncePerRequestFilter{
     }
 
     @Override
-protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException { 
-
+   
     String authorizedHeader = request.getHeader("Authorization");
-
     System.out.println("🔍 Header Authorization recebido: " + authorizedHeader); //para ver o header na saída do terminal
     
     if (!Strings.isEmpty(authorizedHeader) && authorizedHeader.startsWith("Bearer ")){

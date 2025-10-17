@@ -38,6 +38,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                     .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                     // ✅ Endpoint do swagger - documentação
+                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
                     // ✅ Endpoints públicos (autenticação)
                     .requestMatchers(HttpMethod.POST, "/auth/logar").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
