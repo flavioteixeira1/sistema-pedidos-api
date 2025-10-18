@@ -23,6 +23,8 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
 
     Maven
 
+    Swagger 
+
 📋 Pré-requisitos
 
     Java 17 ou superior
@@ -167,7 +169,10 @@ UserRole
 3. Configure a aplicação
 
 3.1. Copie `application-example.properties` para `application.properties`
+
+
 3.2. Preencha com suas configurações:
+
 
 Edite o application.properties:
 # Banco de dados
@@ -194,7 +199,9 @@ mvn spring-boot:run
 mvn clean package
 java -jar target/api-0.0.1-SNAPSHOT.jar
 
+
 A aplicação estará disponível em: http://localhost:8080
+
 
 🔐 Autenticação
 Registrar Usuário
@@ -208,7 +215,9 @@ POST /auth/registrar
   "role": "USER"
 }
 
+
 Login
+
 
 POST /auth/logar
 
@@ -224,12 +233,18 @@ Resposta:
   "type": "Bearer"
 }
 
+
 ⚠️ Importante: Inclua o token no header das requisições:
+
 
 Authorization: Bearer seu-jwt-token
 
+
 📊 Endpoints Principais
+
+
 👥 Clientes
+
 
 Listar todos os clientes
 
@@ -249,7 +264,9 @@ POST /cliente/save
   "telefone": "(11) 99999-1234"
 }
 
+
 📦 Produtos
+
 
 Listar todos os produtos
 
@@ -265,7 +282,9 @@ POST /produto/save
   "descricao": "Arroz integral tipo 1, pacote 5kg"
 }
 
+
 🛒 Pedidos
+
 
 Listar todos os pedidos
 
@@ -291,9 +310,12 @@ POST /pedido/save
   ]
 }
 
+
 Atualizar pedido
 
-PATCH /pedido/{id}
+
+PUT /pedido/{id}
+
 
 {
   "endereco": "Novo Endereço, 456 - Rio de Janeiro/RJ",
@@ -309,19 +331,26 @@ PATCH /pedido/{id}
 
 
 🧪 Testes no Postman
+
 1. Configuração da Collection
 
+
     Crie uma nova Collection
+
 
     Adicione variáveis de ambiente:
 
         baseUrl: http://localhost:8080
 
+
         token: (será preenchido automaticamente)
+
 
 2. Fluxo de Teste
 
+
 a) Autenticação:
+
 
 // Script do teste de login em javascript
 pm.test("Token recebido", function() {
@@ -330,12 +359,16 @@ pm.test("Token recebido", function() {
     pm.collectionVariables.set("token", jsonData.token);
 });
 
+
 b) Headers automáticos:
 Adicione este header em todas as requisições:
 
+
     Key: Authorization
 
+
     Value: Bearer {{token}}
+
 
 
 3. Exemplos de Requisições
@@ -354,7 +387,9 @@ Sequência recomendada:
 
     GET /pedido/busca-todos → Listar pedidos
 
+
 🗃️ Estrutura do Banco
+
 
     clientes - Cadastro de clientes
 
