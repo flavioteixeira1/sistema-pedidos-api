@@ -9,6 +9,7 @@ Uma API RESTful desenvolvida em Spring Boot...
 Sistema de Gestão de Pedidos API
 
 Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, produtos e pedidos.
+
 🚀 Tecnologias Utilizadas
 
     Java 17+
@@ -23,6 +24,8 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
 
     Maven
 
+    Swagger
+
 📋 Pré-requisitos
 
     Java 17 ou superior
@@ -34,20 +37,27 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
     Postman (para testes)
 
 ⚙️ Configuração do Projeto
+
 1. Clone o repositório
 
 git clone https://github.com/seu-usuario/sistema-pedidos-api.git
 cd sistema-pedidos-api
 
+
 2. Configure o banco de dados
+
+
 -- Crie o banco de dados
 CREATE DATABASE rest_spring_db;
+
 
 -- Ou execute o dump SQL fornecido
 mysql -u root -p rest_spring_db < dump.sql
 
 
+
 2.1 Detalhamento do banco de dados rest_spring_db
+
 
 
 ``` 
@@ -118,6 +128,8 @@ classDiagram
 
 
 2.2 Descrição das Entidades e Relacionamentos:
+
+
 Clientes
 
     Entidade principal que representa os clientes do sistema
@@ -125,6 +137,7 @@ Clientes
     Possui relacionamento One-to-Many com Pedido
 
     Atributos: dados pessoais e data de cadastro
+
 
 Pedido
 
@@ -136,7 +149,9 @@ Pedido
 
     Métodos utilitários para cálculo de total e gestão de itens
 
+
 ItemPedido
+
 
     Tabela de junção entre Pedido e Produto
 
@@ -144,13 +159,18 @@ ItemPedido
 
     Possui métodos para cálculo de subtotal
 
+
 Produto
+
 
     Catálogo de produtos disponíveis para venda
 
     Relacionamento One-to-Many com ItemPedido
 
+
+
 User
+
 
     Sistema de autenticação e autorização
 
@@ -158,7 +178,9 @@ User
 
     Suporte a diferentes roles de usuário
 
+
 UserRole
+
 
     Enumeração que define os papéis de usuário no sistema
 
@@ -167,9 +189,13 @@ UserRole
 3. Configure a aplicação
 
 3.1. Copie `application-example.properties` para `application.properties`
+
+
 3.2. Preencha com suas configurações:
 
+
 Edite o application.properties:
+
 # Banco de dados
 spring.datasource.url=jdbc:mysql://localhost:3306/rest_spring_db
 spring.datasource.username=seu_usuario
@@ -190,14 +216,18 @@ api.security.token.secret=sua-chave-secreta-jwt-aqui
 # Compilar e executar
 mvn spring-boot:run
 
+
 # Ou compile primeiro
+
 mvn clean package
 java -jar target/api-0.0.1-SNAPSHOT.jar
 
 A aplicação estará disponível em: http://localhost:8080
 
+
 🔐 Autenticação
-Registrar Usuário
+
+Criar Usuário
 
 POST /auth/registrar
 
@@ -224,11 +254,14 @@ Resposta:
   "type": "Bearer"
 }
 
+
 ⚠️ Importante: Inclua o token no header das requisições:
 
 Authorization: Bearer seu-jwt-token
 
+
 📊 Endpoints Principais
+
 👥 Clientes
 
 Listar todos os clientes
@@ -293,7 +326,7 @@ POST /pedido/save
 
 Atualizar pedido
 
-PATCH /pedido/{id}
+PUT /pedido/{id}
 
 {
   "endereco": "Novo Endereço, 456 - Rio de Janeiro/RJ",
@@ -309,6 +342,7 @@ PATCH /pedido/{id}
 
 
 🧪 Testes no Postman
+
 1. Configuração da Collection
 
     Crie uma nova Collection
