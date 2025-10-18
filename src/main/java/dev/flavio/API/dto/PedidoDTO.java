@@ -4,11 +4,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import dev.flavio.API.Entity.StatusPedido;
+
 public class PedidoDTO {
     private Long id;
     private String endereco;
     private LocalDateTime dataPedido;
-    private String status;
+    private StatusPedido status;
+    private String observacoes;
+    
     private BigDecimal total;
     private Set<ItemPedidoDTO> itens; // Mudou de Set<ProdutoDTO> para Set<ItemPedidoDTO>
     private ClienteResumoDTO cliente;
@@ -23,8 +27,8 @@ public class PedidoDTO {
     public LocalDateTime getDataPedido() { return dataPedido; }
     public void setDataPedido(LocalDateTime dataPedido) { this.dataPedido = dataPedido; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public StatusPedido getStatus() { return status; }
+    public void setStatus(StatusPedido status) { this.status = status; }
 
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
@@ -34,4 +38,7 @@ public class PedidoDTO {
 
     public ClienteResumoDTO getCliente() { return cliente; }
     public void setCliente(ClienteResumoDTO cliente) { this.cliente = cliente; }
+
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }  
 }

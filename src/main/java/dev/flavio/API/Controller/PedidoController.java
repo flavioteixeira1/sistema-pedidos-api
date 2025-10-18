@@ -37,9 +37,9 @@ public class PedidoController {
 
 	 // NOVO ENDPOINT COM DTO
 	@PostMapping("/save")
-    public ResponseEntity<PedidoDTO> criarComDTO(@RequestBody PedidoCreateDTO pedidoDTO) {
-        Pedido pedidoSalvo = service.saveFromDTO(pedidoDTO);
-        return ResponseEntity.ok(PedidoMapper.toDTO(pedidoSalvo));
+    public <Optional> ResponseEntity<PedidoDTO> criarComDTO(@RequestBody PedidoCreateDTO pedidoDTO) {
+        PedidoDTO pedidoSalvo = service.saveFromDTO(pedidoDTO);
+        return ResponseEntity.ok(pedidoSalvo);
     }
 
 
@@ -59,9 +59,9 @@ public class PedidoController {
     public ResponseEntity<PedidoDTO> update(@PathVariable Long id, 
                                            @RequestBody PedidoCreateDTO pedidoDTO) {
         //Pedido pedidoAtualizado = service.updateFromDTO(id, pedidoDTO);
-        Pedido pedidoAtualizado = service.saveFromDTO(pedidoDTO);
+        PedidoDTO pedidoAtualizado = service.saveFromDTO(pedidoDTO);
         service.delete(id);
-        return ResponseEntity.ok(PedidoMapper.toDTO(pedidoAtualizado));
+        return ResponseEntity.ok(pedidoAtualizado);
     }
 
 	// UPDATE PARCIAL - PATCH (apenas campos enviados) -> Não está funcionando devido a nova modelagem das tabelas

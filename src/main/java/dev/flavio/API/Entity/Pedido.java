@@ -7,12 +7,15 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,7 +32,11 @@ public class Pedido {
 
     private LocalDateTime dataPedido;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusPedido status;
+
+    @Lob
+    private String observacoes;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ItemPedido> itens = new HashSet<>();
@@ -39,12 +46,25 @@ public class Pedido {
     @JsonIgnore
     private Clientes cliente;
 
+    // Histórico de alterações de status
+    private LocalDateTime dataAtualizacaoStatus;
+
     // Método para ser executado antes de persistir
     @PrePersist
     public void prePersist() {
         if (dataPedido == null) {
             dataPedido = LocalDateTime.now();
         }
+        if (status == null) {
+            status = StatusPedido.PENDENTE;
+        }
+        dataAtualizacaoStatus = LocalDateTime.now();
+    }
+
+    
+    public void alterarStatus(StatusPedido novoStatus) {
+        this.status = novoStatus;
+        this.dataAtualizacaoStatus = LocalDateTime.now();
     }
 
     // Método auxiliar para adicionar item
@@ -88,12 +108,20 @@ public class Pedido {
         this.dataPedido = dataPedido;
     }
 
-    public String getStatus() {
+    public StatusPedido getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusPedido status) {
         this.status = status;
+    }
+
+    public String getObservacoes(){
+        return this.observacoes;
+    }
+
+    public void setObservacoes(String observacoes){
+        this.observacoes = observacoes;
     }
 
     public Set<ItemPedido> getItens() {
