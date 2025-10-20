@@ -217,6 +217,8 @@ mvn spring-boot:run
 # Ou compile primeiro
 
 mvn clean package
+
+#Depois execute
 java -jar target/api-0.0.1-SNAPSHOT.jar
 
 
