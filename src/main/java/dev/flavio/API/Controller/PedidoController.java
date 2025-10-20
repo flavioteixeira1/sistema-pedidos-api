@@ -4,6 +4,7 @@ import java.util.List;
 //import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +20,7 @@ import dev.flavio.API.Entity.Pedido;
 import dev.flavio.API.Mapper.PedidoMapper;
 import dev.flavio.API.dto.PedidoCreateDTO;
 import dev.flavio.API.dto.PedidoDTO;
+import dev.flavio.API.exceptions.ResourceNotFoundException;
 import dev.flavio.API.service.PedidoService;
 
 
@@ -26,60 +28,66 @@ import dev.flavio.API.service.PedidoService;
 @RequestMapping(value = "/pedido")
 public class PedidoController {
 
-	@Autowired
+	
 	private PedidoService service;
 
-//	@PostMapping
-//	public ResponseEntity<PedidoDTO> criar(@RequestBody Pedido pedido) {
-//		Pedido pedidosalvo = service.save(pedido);
-//		return ResponseEntity.ok(PedidoMapper.toDTO(pedidosalvo));
-//	}
+    public PedidoController(PedidoService service){
+        this.service = service;
+    }
 
-	 // NOVO ENDPOINT COM DTO
+
 	@PostMapping("/save")
-    public <Optional> ResponseEntity<PedidoDTO> criarComDTO(@RequestBody PedidoCreateDTO pedidoDTO) {
+    public <Optional> ResponseEntity<PedidoDTO> criarComDTO(@RequestBody PedidoCreateDTO pedidoDTO) throws BadRequestException {
+        try{
         PedidoDTO pedidoSalvo = service.saveFromDTO(pedidoDTO);
-        return ResponseEntity.ok(pedidoSalvo);
+        return ResponseEntity.ok(pedidoSalvo); }
+        catch (Exception e) {
+            throw new BadRequestException("Erro na criação do Pedido - Verifique campos obrigatórios");
+        }
     }
 
 
 	@GetMapping(value = "/busca-todos")
 	public ResponseEntity<List<PedidoDTO>> buscarTodos() {
+        try {
         List<Pedido> pedidos = service.buscarTodos();
         
         List<PedidoDTO> pedidosDTO = pedidos.stream()
                 .map(PedidoMapper::toDTO)
                 .collect(Collectors.toList());
                 
-        return ResponseEntity.ok(pedidosDTO);
+        return ResponseEntity.ok(pedidosDTO);    
+        }
+        catch(Exception e) {
+             throw new ResourceNotFoundException("Error searching tasks with the provided filters");
+        }
     }
 
 	// UPDATE - PUT (substituição completa)
     @PutMapping("/{id}")
     public ResponseEntity<PedidoDTO> update(@PathVariable Long id, 
-                                           @RequestBody PedidoCreateDTO pedidoDTO) {
-        //Pedido pedidoAtualizado = service.updateFromDTO(id, pedidoDTO);
+                                           @RequestBody PedidoCreateDTO pedidoDTO) throws Exception {
+        
+        if(service.findById(id) == null){throw new ResourceNotFoundException("pedido não encontrado");}
+        try {
         PedidoDTO pedidoAtualizado = service.saveFromDTO(pedidoDTO);
         service.delete(id);
-        return ResponseEntity.ok(pedidoAtualizado);
+        return ResponseEntity.ok(pedidoAtualizado);}
+        catch(Exception e) {
+           throw new BadRequestException("Erro na alteração do Pedido - Verifique campos obrigatórios"); 
+        }
     }
 
-	// UPDATE PARCIAL - PATCH (apenas campos enviados) -> Não está funcionando devido a nova modelagem das tabelas
-   
-   // @PatchMapping("/{id}")
-   // public ResponseEntity<PedidoDTO> partialUpdate(@PathVariable Long id,
-   //                                               @RequestBody Map<String, Object> updates) {
-        // Implementação para atualização parcial
-   //     Pedido pedidoAtualizado = service.partialUpdate(id, updates);
-   //     return ResponseEntity.ok(PedidoMapper.toDTO(pedidoAtualizado));
-   // }
-
-
-
+	
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<Void> excluiPedido(@PathVariable Long id) {
-		service.delete(id);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<Void> excluiPedido(@PathVariable Long id)  throws Exception {
+		if(service.findById(id) == null){throw new ResourceNotFoundException("pedido não encontrado");}
+        try {
+        service.delete(id);
+		return ResponseEntity.noContent().build();}
+        catch (Exception e) {
+        throw new ResourceNotFoundException("Error searching tasks with the provided filters");
+        }
 	}
 
 	@GetMapping(value = "/{id}")
