@@ -20,7 +20,7 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
 
     Spring Data JPA
 
-    MariaDB/MySQL
+    PostgreSQL
 
     Maven
 
@@ -32,7 +32,7 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
 
     Maven 3.6+
 
-    MariaDB/MySQL
+    PostgreSQL
 
     Postman (para testes)
 
@@ -41,6 +41,7 @@ Uma API RESTful desenvolvida em Spring Boot para gerenciamento de clientes, prod
 1. Clone o repositório
 
 git clone https://github.com/seu-usuario/sistema-pedidos-api.git
+
 cd sistema-pedidos-api
 
 
@@ -48,15 +49,11 @@ cd sistema-pedidos-api
 
 
 -- Crie o banco de dados
-CREATE DATABASE rest_spring_db;
-
-
--- Ou execute o dump SQL fornecido
-mysql -u root -p rest_spring_db < dump.sql
+CREATE DATABASE api_produtos;
 
 
 
-2.1 Detalhamento do banco de dados rest_spring_db
+2.1 Detalhamento do banco de dados api_produtos
 
 
 
@@ -222,7 +219,12 @@ mvn spring-boot:run
 mvn clean package
 java -jar target/api-0.0.1-SNAPSHOT.jar
 
-A aplicação estará disponível em: http://localhost:8080
+4.1 Verifique se as tabelas foram criadas no banco de dados (PostgreSQL), e os exemplos carregados (arquivos da pasta db.migration)
+
+A aplicação estará disponível em: http://localhost:8080 , use o Swagger para acessar:
+
+http://localhost:8080/swagger-ui/index.html
+
 
 
 🔐 Autenticação
