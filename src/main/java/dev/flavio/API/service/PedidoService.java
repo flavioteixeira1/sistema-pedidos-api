@@ -6,54 +6,92 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.flavio.API.Entity.Clientes;
 import dev.flavio.API.Entity.Pedido;
 import dev.flavio.API.Entity.Produto;
+import dev.flavio.API.Entity.StatusPedido;
 import dev.flavio.API.Entity.ItemPedido;
 import dev.flavio.API.Repository.ClientesRepository;
 import dev.flavio.API.Repository.PedidoRepository;
 import dev.flavio.API.Repository.ProdutoRepository;
 import dev.flavio.API.dto.PedidoCreateDTO;
+import dev.flavio.API.dto.PedidoDTO;
 import dev.flavio.API.dto.ItemPedidoCreateDTO;
+import dev.flavio.API.dto.ClienteResumoDTO;
+import dev.flavio.API.dto.ProdutoDTO;
+import dev.flavio.API.dto.ItemPedidoDTO;
 
 @Service
 public class PedidoService {
 
-    @Autowired
     private PedidoRepository repository;
-
-    @Autowired
     private ProdutoRepository produtoRepository;
-
-    @Autowired
     private ClientesRepository clienteRepository;
 
-    // Método antigo - manter por compatibilidade (se necessário)
-    @Deprecated
-    public Pedido save(Pedido pedido) {
-        pedido.setDataPedido(LocalDateTime.now());
-        
-        // Se o pedido já tem itens, garantir que estão corretamente configurados
-        if (pedido.getItens() != null) {
-            for (ItemPedido item : pedido.getItens()) {
-                item.setPedido(pedido);
-                if (item.getPrecoUnitario() == null && item.getProduto() != null) {
-                    item.setPrecoUnitario(BigDecimal.valueOf(item.getProduto().getPreco()));
-                }
-            }
-        }
-        
-        return repository.save(pedido);
+    public PedidoService(PedidoRepository repository, ProdutoRepository produtoRepository, ClientesRepository clientesRepository){
+        this.repository = repository;
+        this.produtoRepository = produtoRepository;
+        this.clienteRepository = clientesRepository;
     }
 
-    // NOVO MÉTODO COM DTO - ATUALIZADO
+    // MÉTODO PARA CONVERTER PEDIDO PARA DTO (FALTANTE)
+    private PedidoDTO converterParaDTO(Pedido pedido) {
+        PedidoDTO dto = new PedidoDTO();
+        dto.setId(pedido.getId());
+        dto.setEndereco(pedido.getEndereco());
+        dto.setDataPedido(pedido.getDataPedido());
+        dto.setStatus(pedido.getStatus());
+        dto.setObservacoes(pedido.getObservacoes());
+        dto.setTotal(pedido.getTotal());
+        
+        // Converter cliente para DTO
+        if (pedido.getCliente() != null) {
+            ClienteResumoDTO clienteDTO = new ClienteResumoDTO();
+            clienteDTO.setId(pedido.getCliente().getId());
+            clienteDTO.setNome(pedido.getCliente().getNome());
+            clienteDTO.setEmail(pedido.getCliente().getEmail());
+            dto.setCliente(clienteDTO);
+        }
+        
+        // Converter itens para DTO
+        if (pedido.getItens() != null) {
+            Set<ItemPedidoDTO> itensDTO = pedido.getItens().stream()
+                .map(this::converterItemParaDTO)
+                .collect(Collectors.toSet());
+            dto.setItens(itensDTO);
+        }
+        
+        return dto;
+    }
+    
+    // MÉTODO PARA CONVERTER ITEM PEDIDO PARA DTO
+    private ItemPedidoDTO converterItemParaDTO(ItemPedido item) {
+        ItemPedidoDTO dto = new ItemPedidoDTO();
+        dto.setId(item.getId());
+        dto.setQuantidade(item.getQuantidade());
+        dto.setPrecoUnitario(item.getPrecoUnitario());
+        dto.setSubtotal(item.getSubtotal());
+        
+        // Converter produto para DTO
+        if (item.getProduto() != null) {
+            ProdutoDTO produtoDTO = new ProdutoDTO();
+            produtoDTO.setId(item.getProduto().getId());
+            produtoDTO.setNome(item.getProduto().getNome());
+            produtoDTO.setPreco(item.getProduto().getPreco());
+            produtoDTO.setDescricao(item.getProduto().getDescricao());
+            dto.setProduto(produtoDTO);
+        }
+        
+        return dto;
+    }
+
+    // MÉTODO saveFromDTO CORRIGIDO
     @Transactional
-    public Pedido saveFromDTO(PedidoCreateDTO pedidoDTO) {
+    public PedidoDTO saveFromDTO(PedidoCreateDTO pedidoDTO) {
         Pedido pedido = new Pedido();
         
         // Buscar e validar cliente
@@ -62,11 +100,12 @@ public class PedidoService {
         
         // Configurar pedido básico
         pedido.setEndereco(pedidoDTO.getEndereco());
-        pedido.setStatus(pedidoDTO.getStatus());
+        pedido.setStatus(pedidoDTO.getStatus() != null ? pedidoDTO.getStatus() : StatusPedido.PENDENTE);
+        pedido.setObservacoes(pedidoDTO.getObservacoes());
         pedido.setDataPedido(LocalDateTime.now());
         pedido.setCliente(cliente);
 
-        // Processar itens do pedido (produtos com quantidades)
+        // Processar itens do pedido
         if (pedidoDTO.getItens() != null && !pedidoDTO.getItens().isEmpty()) {
             Set<ItemPedido> itens = new HashSet<>();
             
@@ -88,40 +127,13 @@ public class PedidoService {
             pedido.setItens(itens);
         }
 
-        return repository.save(pedido);
+        Pedido pedidoSalvo = repository.save(pedido);
+        return converterParaDTO(pedidoSalvo);
     }
 
+    // MÉTODO updateFromDTO CORRIGIDO
     @Transactional
-    public Pedido update(Pedido pedido) {
-        // Verifica se o pedido existe
-        Pedido pedidoExistente = repository.findById(pedido.getId())
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
-
-        // Atualiza os campos básicos
-        pedidoExistente.setEndereco(pedido.getEndereco());
-        pedidoExistente.setStatus(pedido.getStatus());
-
-        // Atualiza os itens se fornecidos
-        if (pedido.getItens() != null) {
-            // Limpar itens existentes
-            pedidoExistente.getItens().clear();
-            
-            // Adicionar novos itens
-            for (ItemPedido item : pedido.getItens()) {
-                item.setPedido(pedidoExistente);
-                if (item.getPrecoUnitario() == null && item.getProduto() != null) {
-                    item.setPrecoUnitario(BigDecimal.valueOf(item.getProduto().getPreco()));
-                }
-                pedidoExistente.getItens().add(item);
-            }
-        }
-
-        return repository.save(pedidoExistente);
-    }
-
-    // Método update usando DTO
-    @Transactional
-    public Pedido updateFromDTO(Long id, PedidoCreateDTO pedidoDTO) {
+    public PedidoDTO updateFromDTO(Long id, PedidoCreateDTO pedidoDTO) {
         // Buscar pedido existente
         Pedido pedidoExistente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
@@ -133,6 +145,7 @@ public class PedidoService {
         // Atualizar campos básicos
         pedidoExistente.setEndereco(pedidoDTO.getEndereco());
         pedidoExistente.setStatus(pedidoDTO.getStatus());
+        pedidoExistente.setObservacoes(pedidoDTO.getObservacoes());
         pedidoExistente.setCliente(cliente);
 
         // Limpar itens existentes
@@ -156,42 +169,80 @@ public class PedidoService {
             }
         }
 
+        Pedido pedidoAtualizado = repository.save(pedidoExistente);
+        return converterParaDTO(pedidoAtualizado);
+    }
+
+    // MÉTODO alterarStatus CORRIGIDO E COMPLETO
+    @Transactional
+    public PedidoDTO alterarStatus(Long pedidoId, StatusPedido novoStatus) {
+        Pedido pedido = repository.findById(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        
+        // Usar o método alterarStatus da entidade Pedido
+        pedido.alterarStatus(novoStatus);
+        
+        Pedido pedidoAtualizado = repository.save(pedido);
+        return converterParaDTO(pedidoAtualizado);
+    }
+
+    // MÉTODO PARA BUSCAR POR ID RETORNANDO DTO
+    public PedidoDTO findByIdDTO(Long id) {
+        Pedido pedido = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        return converterParaDTO(pedido);
+    }
+
+    // MÉTODO PARA LISTAR TODOS RETORNANDO DTOs
+    public List<PedidoDTO> findAllDTO() {
+        return repository.findAll().stream()
+            .map(this::converterParaDTO)
+            .collect(Collectors.toList());
+    }
+
+    // MÉTODOS ORIGINAIS (mantidos para compatibilidade)
+    @Transactional
+    public Pedido save(Pedido pedido) {
+        pedido.setDataPedido(LocalDateTime.now());
+        
+        if (pedido.getItens() != null) {
+            for (ItemPedido item : pedido.getItens()) {
+                item.setPedido(pedido);
+                if (item.getPrecoUnitario() == null && item.getProduto() != null) {
+                    item.setPrecoUnitario(BigDecimal.valueOf(item.getProduto().getPreco()));
+                }
+            }
+        }
+        
+        return repository.save(pedido);
+    }
+
+    @Transactional
+    public Pedido update(Pedido pedido) {
+        Pedido pedidoExistente = repository.findById(pedido.getId())
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+
+        pedidoExistente.setEndereco(pedido.getEndereco());
+        pedidoExistente.setStatus(pedido.getStatus());
+        pedidoExistente.setObservacoes(pedido.getObservacoes());
+
+        if (pedido.getItens() != null) {
+            pedidoExistente.getItens().clear();
+            
+            for (ItemPedido item : pedido.getItens()) {
+                item.setPedido(pedidoExistente);
+                if (item.getPrecoUnitario() == null && item.getProduto() != null) {
+                    item.setPrecoUnitario(BigDecimal.valueOf(item.getProduto().getPreco()));
+                }
+                pedidoExistente.getItens().add(item);
+            }
+        }
+
         return repository.save(pedidoExistente);
     }
 
-
-	@Transactional
-	public Pedido partialUpdate(Long id, Map<String, Object> updates) {
-    Pedido pedidoExistente = repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
-    
-    // Atualizar apenas campos fornecidos
-    if (updates.containsKey("endereco")) {
-        pedidoExistente.setEndereco((String) updates.get("endereco"));
-    }
-    
-    if (updates.containsKey("status")) {
-        pedidoExistente.setStatus((String) updates.get("status"));
-    }
-    
-    if (updates.containsKey("clienteId")) {
-        Long clienteId = ((Number) updates.get("clienteId")).longValue();
-        Clientes cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-        pedidoExistente.setCliente(cliente);
-    }
-    
-    // Para itens, você pode decidir se permite atualização parcial
-    // ou exige substituição completa
-    
-    return repository.save(pedidoExistente);
-	}
-
-
-
     @Transactional
     public void delete(Long id) {
-        // Verifica se o pedido existe antes de deletar
         Pedido pedido = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
         repository.delete(pedido);

@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import dev.flavio.API.Controller.ProductNullException;
 import dev.flavio.API.Controller.ProductPriceException;
 import dev.flavio.API.Entity.Produto;
 import dev.flavio.API.Repository.ProdutoRepository;

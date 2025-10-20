@@ -29,6 +29,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+
 ### VS Code ###
 .vscode/
 
@@ -63,5 +64,12 @@ application.properties
 Diagrama_tabelas.mermaid
 Diagrama_Tabelas.png
 backupv1.sql
+dump-api_produtos-202510191837.sql
+FrontV1.html
+FrontV3.html
+FrontV4.html
+backupv1.sql
+dump.sql
+
 
 

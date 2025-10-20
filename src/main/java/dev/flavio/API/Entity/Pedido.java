@@ -7,13 +7,17 @@ import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,10 +30,13 @@ public class Pedido {
     private Long id;
 
     private String endereco;
-
     private LocalDateTime dataPedido;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusPedido status;
+
+    @Lob
+    private String observacoes;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ItemPedido> itens = new HashSet<>();
@@ -39,28 +46,30 @@ public class Pedido {
     @JsonIgnore
     private Clientes cliente;
 
-    // Método para ser executado antes de persistir
+    
+    private LocalDateTime dataAtualizacaoStatus;
+
     @PrePersist
     public void prePersist() {
         if (dataPedido == null) {
             dataPedido = LocalDateTime.now();
         }
+        if (status == null) {
+            status = StatusPedido.PENDENTE;
+        }
+        if (dataAtualizacaoStatus == null) {
+            dataAtualizacaoStatus = LocalDateTime.now();
+        }
     }
 
-    // Método auxiliar para adicionar item
-    public void adicionarItem(Produto produto, Integer quantidade) {
-        ItemPedido item = new ItemPedido();
-        item.setPedido(this);
-        item.setProduto(produto);
-        item.setQuantidade(quantidade);
-        item.setPrecoUnitario(BigDecimal.valueOf(produto.getPreco()));
-        itens.add(item);
+    @PreUpdate
+    public void preUpdate() {
+        dataAtualizacaoStatus = LocalDateTime.now();
     }
 
-    // Método auxiliar para remover item
-    public void removerItem(ItemPedido item) {
-        itens.remove(item);
-        item.setPedido(null);
+    public void alterarStatus(StatusPedido novoStatus) {
+        this.status = novoStatus;
+        this.dataAtualizacaoStatus = LocalDateTime.now();
     }
 
     // Getters e Setters
@@ -88,21 +97,29 @@ public class Pedido {
         this.dataPedido = dataPedido;
     }
 
-    public String getStatus() {
+    public StatusPedido getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusPedido status) {
         this.status = status;
+        this.dataAtualizacaoStatus = LocalDateTime.now();
+    }
+
+    public String getObservacoes() {
+        return observacoes;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
     }
 
     public Set<ItemPedido> getItens() {
         return itens;
     }
-    
+
     public void setItens(Set<ItemPedido> itens) {
         this.itens = itens;
-        // Garantir o relacionamento bidirecional
         if (itens != null) {
             for (ItemPedido item : itens) {
                 item.setPedido(this);
@@ -118,7 +135,14 @@ public class Pedido {
         this.cliente = cliente;
     }
 
-    // Calcular total do pedido
+    public LocalDateTime getDataAtualizacaoStatus() {
+        return dataAtualizacaoStatus;
+    }
+
+    public void setDataAtualizacaoStatus(LocalDateTime dataAtualizacaoStatus) {
+        this.dataAtualizacaoStatus = dataAtualizacaoStatus;
+    }
+
     @JsonProperty("total")
     public BigDecimal getTotal() {
         if (itens == null || itens.isEmpty()) {
@@ -129,7 +153,6 @@ public class Pedido {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Método para facilitar a exibição do cliente no JSON
     @JsonProperty("cliente")
     public Clientes getClienteJson() {
         return cliente;
