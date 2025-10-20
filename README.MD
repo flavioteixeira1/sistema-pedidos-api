@@ -219,6 +219,7 @@ mvn spring-boot:run
 mvn clean package
 java -jar target/api-0.0.1-SNAPSHOT.jar
 
+
 4.1 Verifique se as tabelas foram criadas no banco de dados (PostgreSQL), e os exemplos carregados (arquivos da pasta db.migration)
 
 A aplicação estará disponível em: http://localhost:8080 , use o Swagger para acessar:
@@ -240,7 +241,9 @@ POST /auth/registrar
   "role": "USER"
 }
 
+
 Login
+
 
 POST /auth/logar
 
@@ -259,12 +262,16 @@ Resposta:
 
 ⚠️ Importante: Inclua o token no header das requisições:
 
+
 Authorization: Bearer seu-jwt-token
 
 
 📊 Endpoints Principais
 
+
+
 👥 Clientes
+
 
 Listar todos os clientes
 
@@ -284,7 +291,9 @@ POST /cliente/save
   "telefone": "(11) 99999-1234"
 }
 
+
 📦 Produtos
+
 
 Listar todos os produtos
 
@@ -300,7 +309,9 @@ POST /produto/save
   "descricao": "Arroz integral tipo 1, pacote 5kg"
 }
 
+
 🛒 Pedidos
+
 
 Listar todos os pedidos
 
@@ -326,7 +337,9 @@ POST /pedido/save
   ]
 }
 
+
 Atualizar pedido
+
 
 PUT /pedido/{id}
 
@@ -347,17 +360,23 @@ PUT /pedido/{id}
 
 1. Configuração da Collection
 
+
     Crie uma nova Collection
+
 
     Adicione variáveis de ambiente:
 
         baseUrl: http://localhost:8080
 
+
         token: (será preenchido automaticamente)
+
 
 2. Fluxo de Teste
 
+
 a) Autenticação:
+
 
 // Script do teste de login em javascript
 pm.test("Token recebido", function() {
@@ -366,12 +385,16 @@ pm.test("Token recebido", function() {
     pm.collectionVariables.set("token", jsonData.token);
 });
 
+
 b) Headers automáticos:
 Adicione este header em todas as requisições:
 
+
     Key: Authorization
 
+
     Value: Bearer {{token}}
+
 
 
 3. Exemplos de Requisições
@@ -390,7 +413,9 @@ Sequência recomendada:
 
     GET /pedido/busca-todos → Listar pedidos
 
+
 🗃️ Estrutura do Banco
+
 
     clientes - Cadastro de clientes
 
